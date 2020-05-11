@@ -1,0 +1,103 @@
+server:
+  port: 8070
+
+spring:
+  application:
+    name: neptune-user-center
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: 9b702cea-ca45-416a-b545-e4ac3ddc09bc
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: 9b702cea-ca45-416a-b545-e4ac3ddc09bc
+---
+server:
+  port: 8070
+spring:
+  application:
+    name: neptune-user-center
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: 9b702cea-ca45-416a-b545-e4ac3ddc09bc
+      config:
+        name: ${spring.application.name}
+        namespace: 9b702cea-ca45-416a-b545-e4ac3ddc09bc
+        file-extension: yml
+        shared-dataids: system_config.yml
+        refreshable-dataids: system_config.yml
+    sentinel:
+      transport:
+        dashboard: localhost:8068
+#      datasource:
+#        flow-rule:
+#          nacos:
+#            server-addr: localhost:8848
+#            # 注意，这里的namespace不能为空
+#            namespace: 9b702cea-ca45-416a-b545-e4ac3ddc09bc
+#            group-id: SENTINEL_GROUP
+#            data-id: ${spring.application.name}-flow-rules
+#            data-type: json
+#            rule-type: flow
+#        degrade-rule:
+#          nacos:
+#            server-addr: localhost:8848
+#            # 注意，这里的namespace不能为空
+#            namespace: 9b702cea-ca45-416a-b545-e4ac3ddc09bc
+#            group-id: SENTINEL_GROUP
+#            data-id: ${spring.application.name}-sentinel-degrade
+#            data-type: json
+#            rule-type: degrade
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/neptune_user_center?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
+    username: root
+    password: 132113.abc
+  druid:
+    initialSize: 5 #初始化连接大小
+    minIdle: 5     #最小连接池数量
+    maxActive: 20  #最大连接池数量
+    maxWait: 6000  #获取连接时最大等待时间，单位毫秒
+    timeBetweenEvictionRunsMillis: 60000 #配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+    minEvictableIdleTimeMillis: 300000   #配置一个连接在池中最小生存的时间，单位是毫秒
+    validationQuery: SELECT 1 from DUAL  #测试连接
+    testWhileIdle: true                  #申请连接的时候检测，建议配置为true，不影响性能，并且保证安全性
+    testOnBorrow: false                  #获取连接时执行检测，建议关闭，影响性能
+    testOnReturn: false                  #归还连接时执行检测，建议关闭，影响性能
+    poolPreparedStatements: false        #是否开启PSCache，PSCache对支持游标的数据库性能提升巨大，oracle建议开启，mysql下建议关闭
+    maxPoolPreparedStatementPerConnectionSize: 20 #开启poolPreparedStatements后生效
+    filters: stat,wall,log4j #配置扩展插件，常用的插件有=>stat:监控统计  log4j:日志  wall:防御sql注入
+    connectionProperties: 'druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000' #通过connectProperties属性来打开mergeSql功能;慢SQL记录
+  profiles:
+    active: dev
+
+mybatis-plus:
+  configuration:
+    cache-enabled: true
+    use-generated-keys: true
+    default-executor-type: reuse
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  type-aliases-package: com.water.neptune.usercenter.model.po
+  mapper-locations: classpath:mapper/**/*Mapper.xml
+  global-config:
+    db-config:
+      logic-delete-field: isDeleted  #全局逻辑删除字段值 3.3.0开始支持，详情看下面。
+      logic-delete-value: true # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: false # 逻辑未删除值(默认为 0)
+
